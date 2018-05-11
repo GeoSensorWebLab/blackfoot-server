@@ -54,4 +54,6 @@ Ver Cluster Port Status Owner    Data directory              Log file
 
 PostgreSQL should now be running on port 5432 and bound to localhost, and have a socket at `/var/run/postgresql/10-main.pid`.
 
+## License
 
+This documentation is available under Creative Commons [Attribution-ShareAlike 4.0 International](http://creativecommons.org/licenses/by-sa/4.0/).
