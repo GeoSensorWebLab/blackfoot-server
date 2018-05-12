@@ -148,6 +148,39 @@ May 12 00:20:38 blackfoot gost[6943]: 2018/05/12 00:20:38 Connected to database
 May 12 00:20:38 blackfoot gost[6943]: 2018/05/12 00:20:38 Started GOST HTTP Server on localhost:8080
 ```
 
+## Installing Nginx
+
+Nginx will act as a reverse-proxy to GOST, allowing only GET/HEAD/OPTIONS requests and blocking other HTTP requests from the internet. It will also serve the front-end UI HTML site.
+
+```sh
+$ sudo apt install nginx-full
+$ curl -I localhost:80
+HTTP/1.1 200 OK
+Server: nginx/1.14.0 (Ubuntu)
+Date: Sat, 12 May 2018 00:30:06 GMT
+Content-Type: text/html
+Content-Length: 612
+Last-Modified: Sat, 12 May 2018 00:29:02 GMT
+Connection: keep-alive
+ETag: "5af6354e-264"
+Accept-Ranges: bytes
+```
+
+This shows that nginx is running. Next is setting up a virtual host for controlling access to GOST. Copy the contents of `gost.conf` to `/etc/nginx/sites-available/gost`. Then link the configuration to the enabled sites.
+
+```sh
+$ sudo ln -s /etc/nginx/sites-available/gost /etc/nginx/sites-enabled/gost
+$ sudo systemctl reload nginx
+$ curl localhost:6080/v1.0/Things
+{
+   "value": []
+}
+```
+
+## Installing Front-end UI
+
+TODO
+
 ## License
 
 This documentation is available under Creative Commons [Attribution-ShareAlike 4.0 International](http://creativecommons.org/licenses/by-sa/4.0/).
