@@ -2,18 +2,27 @@
 
 This document covers the setup of a server for the services on the Arctic Sensor Web expansion project.
 
+Arctic Sensor Web is a part of the [Arctic Connect][] platform of research services.
+
+[Arctic Connect]: http://arcticconnect.org
+
 ## Services
 
 The instance has the following services:
 
-* PostgreSQL 10, for GOST database
-* GOST, for OGC SensorThings API
-* Nginx, for proxy to GOST and front-end
+* [PostgreSQL][] 10, for GOST database
+* [GOST][], for [OGC SensorThings API][OGC STA]
+* [Nginx][], for proxy to GOST and front-end
 * Arctic Sensor Web Community Front-end UI
+
+[GOST]: https://github.com/gost/server
+[Nginx]: http://nginx.org
+[OGC STA]: http://docs.opengeospatial.org/is/15-078r6/15-078r6.html
+[PostgreSQL]: https://www.postgresql.org
 
 ## Instance Setup
 
-The server is provisioned on Cybera's Rapid Access Cloud, which runs OpenStack.
+The server is provisioned on [Cybera's Rapid Access Cloud](https://www.cybera.ca/services/rapid-access-cloud/), which runs OpenStack.
 
 ```
 Server Name:        blackfoot
@@ -53,6 +62,91 @@ Ver Cluster Port Status Owner    Data directory              Log file
 ```
 
 PostgreSQL should now be running on port 5432 and bound to localhost, and have a socket at `/var/run/postgresql/10-main.pid`.
+
+## Installing GOST
+
+We will download the v0.5 release.
+
+```sh
+$ wget https://github.com/gost/server/releases/download/0.5/gost_ubuntu_x64.zip
+$ sudo apt install unzip
+$ unzip gost_ubuntu_x64.zip -d gost
+```
+
+And download the database initialization scripts too:
+
+```sh
+$ cd ~/gost
+$ git clone https://github.com/gost/gost-db.git
+```
+
+Now create a postgres role, database, and the GOST schema:
+
+```sh
+$ sudo -u postgres psql postgres
+postgres=# create role "gost" with login;
+postgres=# create database "gost" with owner "gost";
+postgres=# \c gost
+gost=# \i /home/ubuntu/gost/gost-db/gost_init_db.sql
+gost=# alter schema "v1" owner to "gost";
+gost=# grant all on database gost to gost;
+gost=# grant all on all tables in schema v1 to gost;
+gost=# \q
+```
+
+And update Postgres to allow the default `ubuntu` user access to the GOST database.
+
+```sh
+$ echo "gost            ubuntu                  gost" | sudo tee -a /etc/postgresql/10/main/pg_ident.conf
+$ echo "local gost gost peer map=gost" | sudo tee -a /etc/postgresql/10/main/pg_hba.conf
+$ sudo sed -E -i 's/^(local +all +all +peer)$/local gost gost peer map=gost\n\1/' /etc/postgresql/10/main/pg_hba.conf
+$ sudo service postgresql reload
+$ psql -U gost gost -c '\dt+ v1.*'
+```
+
+That last command should list all the tables in the `v1` schema with no error.
+
+Next update the GOST configuration with the contents of `config.yaml`, and start up the server.
+
+```sh
+$ cd ~/gost/linux64
+$ chmod +x gost
+$ ./gost
+```
+
+In a new terminal or tmux window, use `curl` to verify the server is running:
+
+```sh
+$ curl localhost:8080/v1.0/Things
+{
+   "value": []
+}
+```
+
+The response should be an empty collection of `Thing` entities.
+
+Next we install a Systemd unit file to have GOST automatically start with the server. Copy the contents of `gost.service` to `/etc/systemd/system/gost.service` on the system, then update Systemd:
+
+```sh
+$ sudo systemctl daemon-reload
+$ sudo systemctl enable gost
+$ sudo systemctl start gost
+$ sudo systemctl status gost
+● gost.service - GOST (Go SensorThings) API service
+   Loaded: loaded (/etc/systemd/system/gost.service; enabled; vendor preset: enabled)
+   Active: active (running) since Sat 2018-05-12 00:20:38 UTC; 4min 25s ago
+ Main PID: 6943 (gost)
+    Tasks: 7 (limit: 2362)
+   CGroup: /system.slice/gost.service
+           └─6943 /home/ubuntu/gost/linux64/gost -config /home/ubuntu/gost/linux64/config.yaml
+
+May 12 00:20:38 blackfoot systemd[1]: Started GOST (Go SensorThings) API service.
+May 12 00:20:38 blackfoot gost[6943]: 2018/05/12 00:20:38 Starting GOST....
+May 12 00:20:38 blackfoot gost[6943]: 2018/05/12 00:20:38 Showing debug logs
+May 12 00:20:38 blackfoot gost[6943]: 2018/05/12 00:20:38 Creating database connection, host: "/var/run/postgresql/", po
+May 12 00:20:38 blackfoot gost[6943]: 2018/05/12 00:20:38 Connected to database
+May 12 00:20:38 blackfoot gost[6943]: 2018/05/12 00:20:38 Started GOST HTTP Server on localhost:8080
+```
 
 ## License
 

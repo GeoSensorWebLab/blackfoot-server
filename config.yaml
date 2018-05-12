@@ -1,0 +1,24 @@
+server:
+    name: GOST Server
+    host: localhost
+    port: 8080
+    externalUri: http://localhost:8080/
+    maxEntityResponse: 20
+    indentedJson: true
+    https: false
+    httpsCert:
+    httpsKey:
+database:
+    host: /var/run/postgresql/
+    port:
+    user: gost
+    password:
+    database: gost
+    schema: v1
+    ssl: false
+    maxIdleConns: 30
+    maxOpenConns: 100
+mqtt:
+    enabled: false
+    host: localhost
+    port: 1883

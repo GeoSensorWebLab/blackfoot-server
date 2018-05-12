@@ -1,0 +1,11 @@
+[Unit]
+Description=GOST (Go SensorThings) API service
+Wants=postgresql.service
+
+[Service]
+Type=simple
+User=ubuntu
+ExecStart=/home/ubuntu/gost/linux64/gost -config /home/ubuntu/gost/linux64/config.yaml
+
+[Install]
+WantedBy=multi-user.target
