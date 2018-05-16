@@ -90,7 +90,8 @@ postgres=# \c gost
 gost=# \i /home/ubuntu/gost/gost-db/gost_init_db.sql
 gost=# alter schema "v1" owner to "gost";
 gost=# grant all on database gost to gost;
-gost=# grant all on all tables in schema v1 to gost;
+gost=# grant all privileges on all tables in schema v1 to gost;
+gost=# grant all privileges on all sequences in schema v1 to gost;
 gost=# \q
 ```
 
