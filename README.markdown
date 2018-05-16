@@ -171,11 +171,13 @@ This shows that nginx is running. Next is setting up a virtual host for controll
 ```sh
 $ sudo ln -s /etc/nginx/sites-available/gost /etc/nginx/sites-enabled/gost
 $ sudo systemctl reload nginx
-$ curl localhost:6080/v1.0/Things
+$ curl localhost:6443/v1.0/Things
 {
    "value": []
 }
 ```
+
+We are using port 6443 as an upstream server will have SSL enabled for this port. *This* server does not have to worry about SSL at all.
 
 ## Installing Front-end UI
 
