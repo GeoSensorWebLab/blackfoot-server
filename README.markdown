@@ -180,6 +180,78 @@ $ curl localhost:6443/v1.0/Things
 
 We are using port 6443 as an upstream server will have SSL enabled for this port. *This* server does not have to worry about SSL at all.
 
+## Installing Backend Service
+
+This service will ingest data from the data providers and insert it into GOST. First clone the repository to the server:
+
+```sh
+$ git clone <REPO URL>
+```
+
+Then install Ruby 2.3 or newer. Ubuntu 18.04 includes Ruby 2.5.
+
+```sh
+$ sudo apt install ruby ruby-dev
+$ mkdir ~/.ruby
+$ echo "export GEM_HOME=~/.ruby" >> ~/.bashrc
+$ echo 'export PATH="$PATH:~/.ruby/bin"' >> ~/.bashrc
+$ source ~/.bashrc
+```
+
+Install bundler and the gem pre-requisites:
+
+```sh
+$ cd ~/data-transloader
+$ gem install bundler
+$ sudo apt install build-essential patch zlib1g-dev liblzma-dev
+$ bundle install
+```
+
+You should be able to get the help message for the tool now:
+
+```sh
+$ ruby transload --help
+Usage: transload <get|put> <metadata|observations> <arguments>
+--source SOURCE             Data source; allowed: 'environment_canada'
+--station STATION           Station identifier
+--cache CACHE               Path for filesystem storage cache
+--date DATE                 ISO8601 date for 'put observations'. Also supports 'latest'
+--help                      Print this help message
+```
+
+Next we will set up the station metadata for our stations.
+
+```sh
+$ mkdir ~/data
+$ for station in YYQ WCA WAY YEV YZF XCM XFB XRB XZC MFX WUM; do
+echo "Getting metadata for $station"
+ruby transload get metadata --source environment_canada --station $station --cache ~/data
+done
+```
+
+We are going to fool the transloader into going directly to the local nginx instance for uploads, instead of to the web and the upstream server that has HTTPs enabled. This allows us to access GOST for uploads, as the requests are coming from the same server.
+
+```sh
+$ echo "127.0.0.1 sensors.arcticconnect.org" | sudo tee -a /etc/hosts
+```
+
+And then convert and upload the metadata into GOST.
+
+```sh
+$ for station in YYQ WCA WAY YEV YZF XCM XFB XRB XZC MFX WUM; do
+echo "Uploading metadata for $station"
+ruby transload put metadata --source environment_canada --station $station --cache ~/data --destination http://localhost:8080/v1.0/
+done
+```
+
+If you check GOST, you can see the uploaded items: [https://sensors.arcticconnect.org:6443/v1.0/Datastreams](https://sensors.arcticconnect.org:6443/v1.0/Datastreams).
+
+TODO: Observation download/upload
+
+### Scheduling the Transloader with Cron
+
+TODO
+
 ## Installing Front-end UI
 
 TODO
