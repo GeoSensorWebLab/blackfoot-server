@@ -246,7 +246,25 @@ done
 
 If you check GOST, you can see the uploaded items: [https://sensors.arcticconnect.org:6443/v1.0/Datastreams](https://sensors.arcticconnect.org:6443/v1.0/Datastreams).
 
-TODO: Observation download/upload
+Now we can download observations.
+
+```sh
+$ for station in YYQ WCA WAY YEV YZF XCM XFB XRB XZC MFX WUM; do
+echo "Downloading observations for $station"
+ruby transload get observations --source environment_canada --station $station --cache ~/data
+done
+```
+
+And then upload the observations.
+
+```sh
+$ for station in YYQ WCA WAY YEV YZF XCM XFB XRB XZC MFX WUM; do
+echo "Uploading observations for $station"
+ruby transload put observations --source environment_canada --station $station --cache ~/data --date latest --destination http://localhost:8080/v1.0/
+done
+```
+
+The observations can then be viewed online: [https://sensors.arcticconnect.org:6443/v1.0/Observations](https://sensors.arcticconnect.org:6443/v1.0/Observations).
 
 ### Scheduling the Transloader with Cron
 
