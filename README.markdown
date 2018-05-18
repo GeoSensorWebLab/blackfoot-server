@@ -107,7 +107,7 @@ $ psql -U gost gost -c '\dt+ v1.*'
 
 That last command should list all the tables in the `v1` schema with no error.
 
-Next update the GOST configuration with the contents of `config.yaml`, and start up the server.
+Next update the GOST configuration with the contents of `contrib/gost/config.yaml`, and start up the server.
 
 ```sh
 $ cd ~/gost/linux64
@@ -126,7 +126,7 @@ $ curl localhost:8080/v1.0/Things
 
 The response should be an empty collection of `Thing` entities.
 
-Next we install a Systemd unit file to have GOST automatically start with the server. Copy the contents of `gost.service` to `/etc/systemd/system/gost.service` on the system, then update Systemd:
+Next we install a Systemd unit file to have GOST automatically start with the server. Copy the contents of `contrib/systemd/gost.service` to `/etc/systemd/system/gost.service` on the system, then update Systemd:
 
 ```sh
 $ sudo systemctl daemon-reload
@@ -167,7 +167,7 @@ ETag: "5af6354e-264"
 Accept-Ranges: bytes
 ```
 
-This shows that nginx is running. Next is setting up a virtual host for controlling access to GOST. Copy the contents of `gost.conf` to `/etc/nginx/sites-available/gost`. Then link the configuration to the enabled sites.
+This shows that nginx is running. Next is setting up a virtual host for controlling access to GOST. Copy the contents of `contrib/nginx/gost.conf` to `/etc/nginx/sites-available/gost`. Then link the configuration to the enabled sites.
 
 ```sh
 $ sudo ln -s /etc/nginx/sites-available/gost /etc/nginx/sites-enabled/gost
@@ -276,9 +276,9 @@ There are two main ways to get the observations while they are fresh. First is t
 
 We will use cron to run a script every 20 minutes checking for new data. Supporting [conditional GET headers][Conditional] will require an update to the Data Transloader, so until then we will issue simple GET requests.
 
-Start by creating a file with a list of the station ids. Observations will be downloaded from these stations only. As this will be read by a shell script, it will be formatted with one station id per line. See `stations.txt` for a sample. Save this file to `~/auto-download`.
+Start by creating a file with a list of the station ids. Observations will be downloaded from these stations only. As this will be read by a shell script, it will be formatted with one station id per line. See `contrib/auto-download/stations.txt` for a sample. Save this file to `~/auto-download`.
 
-Next add the automatic download script `auto-transload.sh` to the same directory, and make it executable:
+Next add the automatic download script `contrib/auto-download/auto-transload.sh` to the same directory, and make it executable:
 
 ```sh
 $ cd ~/auto-download
