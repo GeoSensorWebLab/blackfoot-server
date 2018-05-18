@@ -264,11 +264,50 @@ ruby transload put observations --source environment_canada --station $station -
 done
 ```
 
-The observations can then be viewed online: [https://sensors.arcticconnect.org:6443/v1.0/Observations](https://sensors.arcticconnect.org:6443/v1.0/Observations).
+The observations can then be viewed online: [https://sensors.arcticconnect.org:6443/v1.0/Observations][Observations].
+
+[Observations]: https://sensors.arcticconnect.org:6443/v1.0/Observations
 
 ### Scheduling the Transloader with Cron
 
-TODO
+As observations from Environment Canada are published every hour<sup>1</sup>, we will need to automatically download them every hour to get the latest results. Ideally we would download the observations immediately after they have been updated by Environment Canada, however the time that the observations are uploaded varies, as can be seen by the "Last Modified" times in the [observations directory listing][listing].
+
+There are two main ways to get the observations while they are fresh. First is to use the Data Mart AMQP service to be automatically notified when an observation is published. This is more complicated to code and the Data Transloader does not support AMQP. The second option is to issue GET requests more frequently than the update interval, and use HTTP headers to avoid downloading data we already have. We will use the second option.
+
+We will use cron to run a script every 20 minutes checking for new data. Supporting [conditional GET headers][Conditional] will require an update to the Data Transloader, so until then we will issue simple GET requests.
+
+Start by creating a file with a list of the station ids. Observations will be downloaded from these stations only. As this will be read by a shell script, it will be formatted with one station id per line. See `stations.txt` for a sample. Save this file to `~/auto-download`.
+
+Next add the automatic download script `auto-transload.sh` to the same directory, and make it executable:
+
+```sh
+$ cd ~/auto-download
+$ chmod +x auto-transload.sh
+```
+
+Now we can edit the crontab to run the script automatically. Open the crontab editor, and if prompted choose your preferred command-line editor. (If you are unsure, then pick `nano` as it is easiest.)
+
+```sh
+$ crontab -e
+```
+
+At the end of the file, add a new line:
+
+```
+5,25,45 * * * * $HOME/auto-download/auto-transload.sh $/HOME/auto-download/stations.txt
+```
+
+This runs the automatic download script every 5 minutes, 25 minutes, and 45 minutes past the hour, every hour.
+
+This should now automatically run the script, and we can see the results in GOST on the [Observations page](https://sensors.arcticconnect.org:6443/v1.0/Observations).
+
+
+[Conditional]: https://developer.mozilla.org/en-US/docs/Web/HTTP/Conditional_requests
+[listing]: http://dd.weather.gc.ca/observations/swob-ml/latest/
+
+----
+
+1. Some observations are published every minute, but only a handful of stations support this.
 
 ## Installing Front-end UI
 
