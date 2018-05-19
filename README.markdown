@@ -294,7 +294,8 @@ $ crontab -e
 At the end of the file, add a new line:
 
 ```
-5,25,45 * * * * $HOME/auto-download/auto-transload.sh $/HOME/auto-download/stations.txt
+GEM_HOME="$HOME/.ruby"
+5,25,45 * * * * $HOME/auto-download/auto-transload.sh $HOME/auto-download/stations.txt
 ```
 
 This runs the automatic download script every 5 minutes, 25 minutes, and 45 minutes past the hour, every hour.
