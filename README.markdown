@@ -294,7 +294,9 @@ $ crontab -e
 At the end of the file, add a new line:
 
 ```
-GEM_HOME="$HOME/.ruby"
+SHELL=/bin/bash
+GEM_HOME="/home/ubuntu/.ruby"
+GEM_PATH="/home/ubuntu/.ruby"
 5,25,45 * * * * $HOME/auto-download/auto-transload.sh $HOME/auto-download/stations.txt
 ```
 
