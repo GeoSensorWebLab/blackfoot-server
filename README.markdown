@@ -4,7 +4,7 @@ This document covers the setup of a server for the services on the Arctic Sensor
 
 Arctic Sensor Web is a part of the [Arctic Connect][] platform of research services.
 
-[Arctic Connect]: http://arcticconnect.org
+[Arctic Connect]: http://arcticconnect.ca
 
 ## Services
 
@@ -232,7 +232,7 @@ done
 We are going to fool the transloader into going directly to the local nginx instance for uploads, instead of to the web and the upstream server that has HTTPs enabled. This allows us to access GOST for uploads, as the requests are coming from the same server.
 
 ```sh
-$ echo "127.0.0.1 sensors.arcticconnect.org" | sudo tee -a /etc/hosts
+$ echo "127.0.0.1 sensors.arcticconnect.ca" | sudo tee -a /etc/hosts
 ```
 
 And then convert and upload the metadata into GOST.
@@ -244,7 +244,7 @@ ruby transload put metadata --source environment_canada --station $station --cac
 done
 ```
 
-If you check GOST, you can see the uploaded items: [https://sensors.arcticconnect.org:6443/v1.0/Datastreams](https://sensors.arcticconnect.org:6443/v1.0/Datastreams).
+If you check GOST, you can see the uploaded items: [https://sensors.arcticconnect.ca:6443/v1.0/Datastreams](https://sensors.arcticconnect.ca:6443/v1.0/Datastreams).
 
 Now we can download observations.
 
@@ -264,9 +264,9 @@ ruby transload put observations --source environment_canada --station $station -
 done
 ```
 
-The observations can then be viewed online: [https://sensors.arcticconnect.org:6443/v1.0/Observations][Observations].
+The observations can then be viewed online: [https://sensors.arcticconnect.ca:6443/v1.0/Observations][Observations].
 
-[Observations]: https://sensors.arcticconnect.org:6443/v1.0/Observations
+[Observations]: https://sensors.arcticconnect.ca:6443/v1.0/Observations
 
 ### Scheduling the Transloader with Cron
 
@@ -302,7 +302,7 @@ GEM_PATH="/home/ubuntu/.ruby"
 
 This runs the automatic download script every 5 minutes, 25 minutes, and 45 minutes past the hour, every hour.
 
-This should now automatically run the script, and we can see the results in GOST on the [Observations page](https://sensors.arcticconnect.org:6443/v1.0/Observations).
+This should now automatically run the script, and we can see the results in GOST on the [Observations page](https://sensors.arcticconnect.ca:6443/v1.0/Observations).
 
 
 [Conditional]: https://developer.mozilla.org/en-US/docs/Web/HTTP/Conditional_requests

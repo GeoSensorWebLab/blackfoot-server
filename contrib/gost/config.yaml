@@ -2,7 +2,7 @@ server:
     name: GOST Server
     host: localhost
     port: 8080
-    externalUri: https://sensors.arcticconnect.org:6443/
+    externalUri: https://sensors.arcticconnect.ca:6443/
     maxEntityResponse: 20
     indentedJson: true
     https: false
