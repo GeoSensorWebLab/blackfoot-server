@@ -324,6 +324,36 @@ The file `contrib/logrotate.d/auto-transload` contains configuration to rotate t
 
 TODO
 
+## (Optional) Log Compression
+
+Storing cached sensor data and metadata will gradually take up disk space. Switching the storage to a compressed file system such as ZFS can reduce the space used by about 3X.
+
+In this example, I created a cloud provider volume through OpenStack and attached it to the running instance, mounted at `/dev/vdd`. I then install ZFS for Linux and set up a new zpool.
+
+```
+$ sudo apt install zfsutils-linux
+$ sudo zpool create datapool /dev/vdd
+$ sudo zfs set compression=on datapool
+$ sudo zfs create datapool/data
+$ sudo cp -rp /home/ubuntu/data/* /datapool/data/.
+(this step may take awhile)
+$ sudo mv /home/ubuntu/data /home/ubuntu/data.old
+$ sudo zfs set mountpoint=/home/ubuntu/data datapool/data
+$ sudo chown ubuntu: /home/ubuntu/data
+```
+
+Then check to see if the data-transloader is properly writing to the data directory by checking the log files — if it isn't working, make sure the permissions are correct and that the ZFS dataset (`datapool/data`) is mounted at the correct path.
+
+If it is okay, then you can delete your original directory at `/home/ubuntu/data.old`.
+
+You can check the effective compression ratio of the dataset:
+
+```
+$ sudo zfs get compressratio datapool/data
+NAME             PROPERTY       VALUE  SOURCE
+datapool/data  compressratio  3.33x  -
+```
+
 ## License
 
 This documentation is available under Creative Commons [Attribution-ShareAlike 4.0 International](http://creativecommons.org/licenses/by-sa/4.0/).
